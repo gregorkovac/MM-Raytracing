@@ -1,0 +1,61 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xparse}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{amsfonts} 
+\usepackage[%
+    left=2.5cm,%
+    right=2.5cm,%
+    top=2.5cm,%
+    bottom=2.5cm,%
+]{geometry}%
+\renewcommand{\contentsname}{Table of contents}
+\renewcommand\listfigurename{Table of figures}
+\renewcommand{\figurename}{Figure}
+\let\chaptername\relax
+
+\graphicspath{ {./images/} }
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \includegraphics[width=0.5\textwidth]{Logotype_FRI_en2_03.png}
+
+    \vspace{7cm}
+    {\LARGE Mathematical modeling\par}
+    {\huge\bfseries Raytracing\par}
+    {\Large Project report\par}
+    \vfill
+
+    Authors: Gregor Kovač, Lana Kučinič, Jovana Videnović
+        
+    {Ljubljana, May 2022}
+\end{titlepage}
+
+\thispagestyle{empty}
+
+\tableofcontents
+
+\thispagestyle{empty}
+
+\listoffigures
+
+\thispagestyle{empty}
+
+\setcounter{page}{4}
+\pagebreak
+
+\chapter{Chapter example}
+\section{Section example}
+
+\begin{figure}[H]
+    \includegraphics[width=1\textwidth]{Logotype_FRI_en2_03.png}
+    \caption{Figure example}
+\end{figure}
+
+\end{document}
