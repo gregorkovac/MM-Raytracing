@@ -1,9 +1,69 @@
-function T = raytracing(f, T0, v, step, maxRef)
+function T = raytracing(f, T0, v, step = 0.1, maxIter = 100, maxRef = 10)
 % raytracing(f, T0, v) projects a ray from the origin point T0 in the 
 % direction v and finds the points where the ray hits the plane, given by
-% the function f.
-% step is the ???
-% maxRef is the maximum number of reflections
+% the function f, and returns them
+% step is the amount the ray moves in every iteration
+% maxIter is the maximum number of iterations
+% maxRef is the maximum number of allowed reflections
+
+% express the parameter z from the plane function
+fz = @(x, y) -f(x, y, 0)/f(0, 0, 1);
+
+% plot the plane
+x = [10 -10 -10 10];
+y = [10 10 -10 -10];
+[x y] = meshgrid(x, y);
+z = fz(x, y);
+surf(x, y, z);
+hold on
+
+% initialize the vector of hit points as empty
+T = [];
+
+% multiply the direction vector with the step size
+step = step*v;
+
+% initialize the previous and current observed point
+prevT = T0;
+currT = T0 + step;
+
+% initialize the function sign in the previous and current point
+prevSign = sign(f(T0(1), T0(2), T0(3)));
+currSign = sign(f(currT(1), currT(2), currT(3)));
+
+% set the number of iterations to 0 
+iter = 0;
+
+% while the sign remains unchanged and the number of iterations is smaller
+% then the maximum number of iterations...
+while (prevSign == currSign && iter <= maxIter)
+   % plot the current point
+   plot3(currT(1), currT(2), currT(3), '.r', 'markersize', 10);
+  
+   % increment the number of iterations
+   iter++;
+  
+   % set the previous point to the current point
+   prevT = currT;
+   
+   % generate a new point
+   currT = currT + step;
+   
+   % set the previous sign to the current sign
+   prevSign = currSign;
+   
+   % generate a new sign
+   currSign = sign(f(currT(1), currT(2), currT(3)));
+  
+endwhile;
+
+% if a hit point is found, add it to T
+if (iter <= maxIter)
+  T = [T; currT];
+endif
+
+% plot the hit point
+plot3(currT(1), currT(2), currT(3), '.b', 'markersize', 20);
 
 endfunction
 
