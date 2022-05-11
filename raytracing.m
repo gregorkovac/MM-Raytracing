@@ -1,4 +1,4 @@
-function T = raytracing(f, T0, v, step = 0.1, maxIter = 100, maxRef = 10)
+function T = raytracing(f, dfdx, dfdy, dfdz, T0, v, step = 0.1, maxIter = 100, maxRef = 10)
 % raytracing(f, T0, v) projects a ray from the origin point T0 in the 
 % direction v and finds the points where the ray hits the plane, given by
 % the function f, and returns them
@@ -8,6 +8,10 @@ function T = raytracing(f, T0, v, step = 0.1, maxIter = 100, maxRef = 10)
 
 % express the parameter z from the plane function
 fz = @(x, y) -f(x, y, 0)/f(0, 0, 1);
+
+g = @(t) f(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
+gdot = @(t) v(1)*dfdx(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(2)*dfdy(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(3)*dfdz(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
+
 
 % plot the plane
 x = [10 -10 -10 10];
@@ -20,12 +24,14 @@ hold on
 % initialize the vector of hit points as empty
 T = [];
 
+t = step;
+
 % multiply the direction vector with the step size
-step = step*v;
+stepv = step*v;
 
 % initialize the previous and current observed point
 prevT = T0;
-currT = T0 + step;
+currT = T0 + stepv;
 
 % initialize the function sign in the previous and current point
 prevSign = sign(f(T0(1), T0(2), T0(3)));
@@ -43,11 +49,13 @@ while (prevSign == currSign && iter <= maxIter)
    % increment the number of iterations
    iter++;
   
+   t = t + step;
+  
    % set the previous point to the current point
    prevT = currT;
    
    % generate a new point
-   currT = currT + step;
+   currT = currT + stepv;
    
    % set the previous sign to the current sign
    prevSign = currSign;
@@ -57,14 +65,24 @@ while (prevSign == currSign && iter <= maxIter)
   
 endwhile;
 
-% if a hit point is found, add it to T
+% if a hit point is found, use Newton's iteration to get a better approximation
 if (iter <= maxIter)
-  T = [T; currT];
-endif
 
-% plot the hit point
-plot3(currT(1), currT(2), currT(3), '.b', 'markersize', 20);
-
+  % define a starting approximation
+  startingApproximation = (t + (t - step)) / 2;
+  
+  % use Newton's method to get a better approximation of the parameter
+  u = newton(g, gdot, startingApproximation);
+  
+  % determine the better hit point
+  U = T0 + v*u
+  
+  % add the hit point to the list of hit points
+  T = [T; U];
+  
+  % plot the hit point
+  plot3(U(1), U(2), U(3), '.m', 'markersize', 30);
+endif          
 endfunction
 
 function [X, n] = newton(F, JF, X0, tol = 1e-10, maxit = 100)

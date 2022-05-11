@@ -1,18 +1,24 @@
 ## Todo in razne opombe
 
 **Funkcija `raytracing`**:
-  - [ ] Iskanje presečišča: Gregor
+  - [x] Iskanje presečišča: Gregor
   - [ ] Odbojni kot: Lana
   - [ ] Barvanje: Jovana
 
-Funkcija zaenkrat poišče ray hit, ampak je treba vse skupaj naredit malo bolj natančno z Newtonovo iteracijo.
+**To fix:** 
+- [ ] Zaenkrat so parcialni odvodi ravnine argumenti funkcije. Treba je pogruntat, če se jih
+da izračunat v Octave.
+- [ ] Računanje ray hita je mogoče mal ugly
 
 **Testiranje funkcije:** \
-Napišeš funkcijo ravnine `f`, ustvariš začetno točko raytracinga `T0`, ustvariš smerni vektor `v`
+Napišeš funkcijo ravnine `f`, napišeš odvode po vsaki spremenljivki (`dfdx`, `dfdy` in `dfdz`), ustvariš začetno točko raytracinga `T0`, ustvariš smerni vektor `v`
 in pokličeš funkcijo.
 ```
 f = @(x, y, z) x+y+z;
-T0 = [2; 2; 2];
+dfdx = @(x, y, z) 1
+dfdy = @(x, y, z) 1
+dfdz = @(x, y, z) 1
+T0 = [5; 5; 5];
 v = [-1; -1; -1];
-raytracing(f, T0, v)
+raytracing(f, dfdx, dfdy, dfdz, T0, v)
 ```
