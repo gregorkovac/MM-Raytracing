@@ -2,7 +2,7 @@
 
 **Funkcija `raytracing`**:
   - [x] Iskanje presečišča: Gregor
-  - [ ] Odbojni kot: Lana
+  - [x] Odbojni kot: Lana
   - [ ] Barvanje: Jovana
 
 **To fix:** 
