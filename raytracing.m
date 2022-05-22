@@ -1,4 +1,4 @@
-function T = raytracing(f, dfdx, dfdy, dfdz, T0, v, step = 0.1, maxIter = 100, maxRef = 10)
+function color = raytracing(f, dfdx, dfdy, dfdz, T0, v, step, maxIter, maxRef)
 % raytracing(f, T0, v) projects a ray from the origin point T0 in the 
 % direction v and finds the points where the ray hits the plane, given by
 % the function f, and returns them
@@ -14,6 +14,7 @@ gdot = @(t) v(1)*dfdx(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(2)*dfd
 
 
 % plot the plane
+%{
 axis equal;
 x = [10 -10 -10 10];
 y = [10 10 -10 -10];
@@ -22,6 +23,7 @@ z = fz(x, y);
 surf(x, y, z);
 
 hold on
+%}
 
 % initialize the vector of hit points as empty
 T = [];
@@ -46,10 +48,10 @@ iter = 0;
 % then the maximum number of iterations...
 while (prevSign == currSign && iter <= maxIter)
    % plot the current point
-   plot3(currT(1), currT(2), currT(3), '.r', 'markersize', 10);
+   %plot3(currT(1), currT(2), currT(3), '.r', 'markersize', 10);
   
    % increment the number of iterations
-   iter++;
+   iter = iter + 1;
   
    t = t + step;
   
@@ -65,7 +67,7 @@ while (prevSign == currSign && iter <= maxIter)
    % generate a new sign
    currSign = sign(f(currT(1), currT(2), currT(3)));
   
-endwhile;
+end;
 
 % if a hit point is found, use Newton's iteration to get a better approximation
 if (iter <= maxIter)
@@ -74,22 +76,24 @@ if (iter <= maxIter)
   startingApproximation = (t + (t - step)) / 2;
   
   % use Newton's method to get a better approximation of the parameter
-  u = newton(g, gdot, startingApproximation);
+  u = newton(g, gdot, startingApproximation, 1e-10, 100);
   
   % determine the better hit point
-  U = T0 + v*u
+  U = T0 + v*u;
   
   % add the hit point to the list of hit points
   T = [T; U];
   
   % plot the hit point
-  plot3(U(1), U(2), U(3), '.m', 'markersize', 30);
-endif          
-  cosf = reflectionAngle(v, U, dfdx, dfdy, dfdz); 
-  
-endfunction
+  % plot3(U(1), U(2), U(3), '.m', 'markersize', 30);
+  cos_reflAngle = reflectionAngle(v, U, dfdx, dfdy, dfdz);
+else 
+  cos_reflAngle = 0;
+end
+color = (1 - cos_reflAngle).*[1; 1; 1]; 
+end
 
-function [X, n] = newton(F, JF, X0, tol = 1e-10, maxit = 100)
+function [X, n] = newton(F, JF, X0, tol, maxit)
 %X = newton(F, JF, X0, tol, maxit) solves the (nonlinear) 
 %system F(X) = 0 using the Newton's iteration with initial
 %guess X0. (JF is the Jacobi matrix of F.)
@@ -108,21 +112,20 @@ end
 if(n == maxit)
 	warning("no convergence after maxit iterations")
 end
-endfunction
+end
 
 function cosf = reflectionAngle(v, T, dfdx, dfdy, dfdz)  
   %fi = reflectionAngle(f, T) calculates the angle ... todo
   
   % n is a normal to the plane from point T
-  n = [ dfdx(T(1), T(2), T(3));  feval(dfdy, T(1), T(2), T(3)); 
-  feval(dfdz, T(1), T(2), T(3))]
+  n = [ dfdx(T(1), T(2), T(3));  feval(dfdy, T(1), T(2), T(3)); feval(dfdz, T(1), T(2), T(3))];
   %G = [ n(1) + T(1); n(2) + T(2); n(3) + T(3)];
    %plot3(G(1), G(2), G(3), '*k', 'markersize', 30);
   
-  hold on;
+  %hold on;
   %plot3(n(1), n(2), n(3), '.r', 'markersize', 30);
-  quiver3(T(1), T(2), T(3), n(1), n(2), n(3),'k')
-  hold on
+  %quiver3(T(1), T(2), T(3), n(1), n(2), n(3),'k')
+  %hold on
   
  
   
@@ -133,16 +136,15 @@ function cosf = reflectionAngle(v, T, dfdx, dfdy, dfdz)
   vn = 2*(v(1) * n(1) + v(2) * n(2) + v(3) * n(3));
   p = [vn * n(1); vn * n(2); vn * n(3)];
   
-  r = [v(1) - p(1); v(2) - p(2); v(3) - p(3)]
+  r = [v(1) - p(1); v(2) - p(2); v(3) - p(3)];
    
   
   
   %r = [(2*s) / (s.^2 + t.^2 + 1); (2*t) / (s.^2 + t.^2 + 1); 
    %   (-1 + s.^2 + t.^2 ) / (s.^2 + t.^2 + 1)]
-   quiver3(T(1), T(2), T(3), r(1), r(2), r(3),'y')
-  hold on   
+  %quiver3(T(1), T(2), T(3), r(1), r(2), r(3),'y')
+  %hold on   
   
-  cosf = (n(1)*r(1) + n(2)*r(2) + n(3)*r(3)) / ((n(1)*n(1) + n(2)*n(2) + 
-  n(3)*n(3)) * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3)))
+  cosf = (n(1)*r(1) + n(2)*r(2) + n(3)*r(3)) / ((n(1)*n(1) + n(2)*n(2) + n(3)*n(3)) * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3)));
   
-endfunction
+end
