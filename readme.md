@@ -3,7 +3,7 @@
 **Funkcija `raytracing`**:
   - [x] Iskanje presečišča: Gregor
   - [x] Odbojni kot: Lana
-  - [ ] Barvanje: Jovana
+  - [x] Barvanje: Jovana
 
 **To fix:** 
 - [ ] Zaenkrat so parcialni odvodi ravnine argumenti funkcije. Treba je pogruntat, če se jih
