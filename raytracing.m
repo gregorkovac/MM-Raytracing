@@ -1,4 +1,4 @@
-function color = raytracing(f, dfdx, dfdy, dfdz, T0, v, step, maxIter, maxRef)
+function [color, U] = raytracing(f, dfdx, dfdy, dfdz, T0, v, step, maxIter, maxRef)
 % raytracing(f, T0, v) projects a ray from the origin point T0 in the 
 % direction v and finds the points where the ray hits the plane, given by
 % the function f, and returns them
@@ -7,6 +7,7 @@ function color = raytracing(f, dfdx, dfdy, dfdz, T0, v, step, maxIter, maxRef)
 % maxRef is the maximum number of allowed reflections
 
 % express the parameter z from the plane function
+U =[];
 fz = @(x, y) -f(x, y, 0)./f(0, 0, 1);
 
 g = @(t) f(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
@@ -90,7 +91,8 @@ if (iter <= maxIter)
 else 
   cos_reflAngle = 0;
 end
-color = (1 - cos_reflAngle).*[1; 1; 1]; 
+color = (cos_reflAngle).*[1; 1; 1];
+
 end
 
 function [X, n] = newton(F, JF, X0, tol, maxit)
