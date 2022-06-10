@@ -1,4 +1,4 @@
-function color = raytracing(def_colors, f, f1, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, T0, v, lightOrigin, step, maxIter, maxRef)
+function color = raytracing(def_colors, f, f1, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, T0, v, lightOrigin, step, maxIter, maxRef, testRef)
 % raytracing(f, T0, v) projects a ray from the origin point T0 in the 
 % direction v and finds the points where the ray hits the plane, given by
 % the function f, and returns them
@@ -55,6 +55,8 @@ currSign1 = sign(f1(currT(1), currT(2), currT(3)));
 
 % set the number of iterations to 0 
 iter = 0;
+
+ret = [];
 
 % while the sign remains unchanged and the number of iterations is smaller
 % then the maximum number of iterations...
@@ -113,9 +115,18 @@ while (iter <= maxIter)
   
   % add the hit point to the list of hit points
   T = [T; U];
+
+ 
+
+  if (testRef == 0)
+  ret = raytracing(def_color, f, @(x,y,z) 0, dfdx, dfdy, dfdz, @(x,y,z) 0, @(x,y,z) 0, @(x,y,z) 0, U, [lightOrigin(1) - U(1); lightOrigin(2) - U(2); lightOrigin(3) - U(3)], lightOrigin, step, maxIter, maxRef, 1);
+  end
+
+
   
   % plot the hit point
   % plot3(U(1), U(2), U(3), '.m', 'markersize', 30);
+
   cos_reflAngle = reflectionAngle(v, U, lightOrigin, df1dx, df1dy, df1dz);
   def_color = def_colors(:, 2);
   break;
@@ -130,7 +141,11 @@ end
 
 % if angle between light source and intersection is bigger than pi/2,
 % ignore the point
-color = (2.*cos_reflAngle).*def_color.*(iter./maxIter); 
+if (isempty(ret) || (ret(1,1) == 0 && ret(2, 1) == 0 && ret(3, 1) == 0))
+    color = (2.*cos_reflAngle).*def_color.*(iter./maxIter); 
+else
+    color = [0; 0; 0];
+end
 end
 
 function [X, n] = newton(F, JF, X0, tol, maxit)
