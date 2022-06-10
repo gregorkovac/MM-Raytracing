@@ -1,4 +1,4 @@
-function [color, U] = raytracing(f, dfdx, dfdy, dfdz, T0, v, step, maxIter, maxRef)
+function color = raytracing(f, dfdx, dfdy, dfdz, T0, v, lightOrigin, step, maxIter, maxRef)
 % raytracing(f, T0, v) projects a ray from the origin point T0 in the 
 % direction v and finds the points where the ray hits the plane, given by
 % the function f, and returns them
@@ -7,7 +7,6 @@ function [color, U] = raytracing(f, dfdx, dfdy, dfdz, T0, v, step, maxIter, maxR
 % maxRef is the maximum number of allowed reflections
 
 % express the parameter z from the plane function
-U =[];
 fz = @(x, y) -f(x, y, 0)./f(0, 0, 1);
 
 g = @(t) f(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
@@ -22,7 +21,6 @@ y = [10 10 -10 -10];
 [x y] = meshgrid(x, y);
 z = fz(x, y);
 surf(x, y, z);
-
 hold on
 %}
 
@@ -87,12 +85,11 @@ if (iter <= maxIter)
   
   % plot the hit point
   % plot3(U(1), U(2), U(3), '.m', 'markersize', 30);
-  cos_reflAngle = reflectionAngle(v, U, dfdx, dfdy, dfdz);
+  cos_reflAngle = reflectionAngle(v, U, lightOrigin, dfdx, dfdy, dfdz);
 else 
   cos_reflAngle = 0;
 end
-color = (cos_reflAngle).*[1; 1; 1];
-
+color = (2.*cos_reflAngle).*[1; 1; 1]; 
 end
 
 function [X, n] = newton(F, JF, X0, tol, maxit)
@@ -116,7 +113,7 @@ if(n == maxit)
 end
 end
 
-function cosf = reflectionAngle(v, T, dfdx, dfdy, dfdz)  
+function cosf = reflectionAngle(v, T, lightOrigin, dfdx, dfdy, dfdz)  
   %fi = reflectionAngle(f, T) calculates the angle ... todo
   
   % n is a normal to the plane from point T
@@ -135,11 +132,12 @@ function cosf = reflectionAngle(v, T, dfdx, dfdy, dfdz)
   %normalize n
   sizen = n(1) *n(1) + n(2) * n(2) + n(3) * n(3) ;
   n = [n(1) / sqrt(sizen);n(2) / sqrt(sizen); n(3) / sqrt(sizen)];
-  vn = 2*(v(1) * n(1) + v(2) * n(2) + v(3) * n(3));
-  p = [vn * n(1); vn * n(2); vn * n(3)];
+  %vn = 2*(v(1) * n(1) + v(2) * n(2) + v(3) * n(3));
+  %p = [vn * n(1); vn * n(2); vn * n(3)];
   
-  r = [v(1) - p(1); v(2) - p(2); v(3) - p(3)];
+  %r = [v(1) - p(1); v(2) - p(2); v(3) - p(3)];
    
+  lvec = [lightOrigin(1) - T(1); lightOrigin(2) - T(2); lightOrigin(3) - T(3)];
   
   
   %r = [(2*s) / (s.^2 + t.^2 + 1); (2*t) / (s.^2 + t.^2 + 1); 
@@ -147,6 +145,7 @@ function cosf = reflectionAngle(v, T, dfdx, dfdy, dfdz)
   %quiver3(T(1), T(2), T(3), r(1), r(2), r(3),'y')
   %hold on   
   
-  cosf = (n(1)*r(1) + n(2)*r(2) + n(3)*r(3)) / ((n(1)*n(1) + n(2)*n(2) + n(3)*n(3)) * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3)));
+  %cosf = (n(1)*r(1) + n(2)*r(2) + n(3)*r(3)) / ((n(1)*n(1) + n(2)*n(2) + n(3)*n(3)) * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3)));
+   cosf = (n(1)*lvec(1) + n(2)*lvec(2) + n(3)*lvec(3)) / sqrt((n(1) * n(1) + n(2) * n(2) + n(3) * n(3))) * sqrt((lvec(1) * lvec(1) + lvec(2) * lvec(2) + lvec(3) * lvec(3)));
   
 end
