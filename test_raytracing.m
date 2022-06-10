@@ -5,6 +5,13 @@ dfdx = @(x, y, z) 2.*x;
 dfdy = @(x, y, z) 2.*y;
 dfdz = @(x, y, z) 2.*(z + 1);
 
+% initializing sphere with the center in (0, 0, -1) and with radius 0.5
+f1 = @(x, y, z) (x - 0).^2 + (y - 0.5).^2 + (z + 1).^2 - 0.5.^2;
+% computing partial derivatives to the parametrization of the sphere
+df1dx = @(x, y, z) 2.*x;
+df1dy = @(x, y, z) 2.*(y - 0.5);
+df1dz = @(x, y, z) 2.*(z + 1);
+
 
 image_width = 80;
 image_height = 60;
@@ -30,7 +37,7 @@ for i=1:image_height
 
     direction_vector = lower_left_corner + u.*horizontal + v.*vertical - origin;
  
-    image(i, j, :) = raytracing(f, dfdx, dfdy, dfdz, origin, direction_vector, lightOrigin, 0.01, 100, 10);
+    image(i, j, :) = raytracing(f, f1, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, origin, direction_vector, lightOrigin, 0.01, 100, 10);
     end
 end
 imshow(image)

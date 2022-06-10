@@ -1,4 +1,4 @@
-function color = raytracing(f, dfdx, dfdy, dfdz, T0, v, lightOrigin, step, maxIter, maxRef)
+function color = raytracing(f, f1, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, T0, v, lightOrigin, step, maxIter, maxRef)
 % raytracing(f, T0, v) projects a ray from the origin point T0 in the 
 % direction v and finds the points where the ray hits the plane, given by
 % the function f, and returns them
@@ -8,9 +8,13 @@ function color = raytracing(f, dfdx, dfdy, dfdz, T0, v, lightOrigin, step, maxIt
 
 % express the parameter z from the plane function
 fz = @(x, y) -f(x, y, 0)./f(0, 0, 1);
+f1z = @(x, y) -f1(x, y, 0)./f1(0, 0, 1);
 
 g = @(t) f(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
 gdot = @(t) v(1)*dfdx(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(2)*dfdy(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(3)*dfdz(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
+
+g1 = @(t) f1(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
+g1dot = @(t) v(1)*df1dx(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(2)*df1dy(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(3)*df1dz(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
 
 
 % plot the plane
@@ -40,12 +44,15 @@ currT = T0 + stepv;
 prevSign = sign(f(T0(1), T0(2), T0(3)));
 currSign = sign(f(currT(1), currT(2), currT(3)));
 
+prevSign1 = sign(f1(T0(1), T0(2), T0(3)));
+currSign1 = sign(f1(currT(1), currT(2), currT(3)));
+
 % set the number of iterations to 0 
 iter = 0;
 
 % while the sign remains unchanged and the number of iterations is smaller
 % then the maximum number of iterations...
-while (prevSign == currSign && iter <= maxIter)
+while (iter <= maxIter)
    % plot the current point
    %plot3(currT(1), currT(2), currT(3), '.r', 'markersize', 10);
   
@@ -62,16 +69,14 @@ while (prevSign == currSign && iter <= maxIter)
    
    % set the previous sign to the current sign
    prevSign = currSign;
+   prevSign1 = currSign1;
    
    % generate a new sign
    currSign = sign(f(currT(1), currT(2), currT(3)));
-  
-end;
-
-% if a hit point is found, use Newton's iteration to get a better approximation
-if (iter <= maxIter)
-
-  % define a starting approximation
+   currSign1 = sign(f1(currT(1), currT(2), currT(3)));
+   
+   if (currSign ~= prevSign)
+     % define a starting approximation
   startingApproximation = (t + (t - step)) / 2;
   
   % use Newton's method to get a better approximation of the parameter
@@ -86,7 +91,32 @@ if (iter <= maxIter)
   % plot the hit point
   % plot3(U(1), U(2), U(3), '.m', 'markersize', 30);
   cos_reflAngle = reflectionAngle(v, U, lightOrigin, dfdx, dfdy, dfdz);
-else 
+  break;
+ endif
+ 
+    if (currSign1 ~= prevSign1)
+     % define a starting approximation
+  startingApproximation = (t + (t - step)) / 2;
+  
+  % use Newton's method to get a better approximation of the parameter
+  u = newton(g1, g1dot, startingApproximation, 1e-10, 100);
+  
+  % determine the better hit point
+  U = T0 + v*u;
+  
+  % add the hit point to the list of hit points
+  T = [T; U];
+  
+  % plot the hit point
+  % plot3(U(1), U(2), U(3), '.m', 'markersize', 30);
+  cos_reflAngle = reflectionAngle(v, U, lightOrigin, df1dx, df1dy, df1dz);
+  break;
+   endif
+   
+end;
+
+% if a hit point is found, use Newton's iteration to get a better approximation
+if (iter > maxIter)
   cos_reflAngle = 0;
 end
 color = (2.*cos_reflAngle).*[1; 1; 1]; 
