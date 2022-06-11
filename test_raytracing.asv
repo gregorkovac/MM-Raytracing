@@ -3,11 +3,33 @@ f = @(x, y, z) (x - 0).^2 + (y - 0.5).^2 + (z + 1).^2 - 0.3.^2;
 dfdx = @(x, y, z) 2.*x;
 dfdy = @(x, y, z) 2.*(y - 0.5);
 dfdz = @(x, y, z) 2.*(z + 1);
-
+%{
 f1 = @(x, y, z) z + 2;
 df1dx = @(x, y, z) 0;
 df1dy = @(x, y, z) 0;
 df1dz = @(x, y, z) 1;
+%}
+%{
+f1 = @(x, y, z) z + 1;
+df1dx = @(x, y, z) 0;
+df1dy = @(x, y, z) 0;
+df1dz = @(x, y, z) 1;
+%}
+
+% equation of torus
+%{
+f1 = @(Th, Phi) (R - sqrt(((R+r.*cos(Th)).*cos(Phi)).^2 + ((R+r.*cos(Th)).*sin(Phi)).^2)).^2 + (r.*sin(Th)).^2 - r^2;
+df1dTh = @(Th, Phi, z) diff(f1, Th);
+df1dPhi = @(Th, Phi, z) 0;
+
+syms f1(u, v, z)
+R = 5;
+r = 2;
+f1 = (R - sqrt(((R+r.*cos(v)).*cos(u)).^2 + ((R+r.*cos(v)).*sin(u)).^2)).^2 + (r.*sin(v)).^2 - r^2 + 0.*z;
+df1dx = diff(f1, v);
+df1dy = diff(f1, u);
+df1dz = 0;
+%}
 
 
 image_width = 800;
@@ -16,10 +38,8 @@ image_height = 600;
 image = zeros(image_height, image_width, 3); 
 
 %initializing origin of rayes
-
 lightOrigin = [0.5; 1; 0];
 origin = [0; 0.5; 0];
-
 origin_height = 2;
 origin_width = origin_height.*image_width/image_height; 
 
@@ -52,5 +72,4 @@ for i=2:image_height-1
     end
 end
 
-% showing image
 imshow(image)
