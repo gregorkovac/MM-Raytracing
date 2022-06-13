@@ -1,4 +1,4 @@
-function color = raytracing(def_colors, f, f1, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, T0, v, lightOrigin, step, maxIter, maxRef, testRef)
+function color = raytracing(def_colors, f, f1, f2, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, df2dx, df2dy, df2dz, T0, v, lightOrigin, step, maxIter, maxRef, testRef)
 % raytracing(f, T0, v) projects a ray from the origin point T0 in the 
 % direction v and finds the points where the ray hits the plane, given by
 % the function f, and returns them
@@ -14,16 +14,15 @@ color = [0; 0; 0];
 % initializing default color
 def_color = def_colors(:, 1);
 
-% express the parameter z from the plane function
-fz = @(x, y) -f(x, y, 0)./f(0, 0, 1);
-f1z = @(x, y) -f1(x, y, 0)./f1(0, 0, 1);
-
 % computing functions and derivatives needed for Newton's method
 g = @(t) f(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
 gdot = @(t) v(1)*dfdx(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(2)*dfdy(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(3)*dfdz(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
 
 g1 = @(t) f1(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
 g1dot = @(t) v(1)*df1dx(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(2)*df1dy(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(3)*df1dz(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
+
+g2 = @(t) f2(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
+g2dot = @(t) v(1)*df2dx(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(2)*df2dy(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t) + v(3)*df2dz(T0(1) + v(1)*t, T0(2) + v(2)*t, T0(3) + v(3)*t);
 
 % initialize the vector of hit points as empty
 T = [];
@@ -43,6 +42,9 @@ currSign = sign(f(currT(1), currT(2), currT(3)));
 
 prevSign1 = sign(f1(T0(1), T0(2), T0(3)));
 currSign1 = sign(f1(currT(1), currT(2), currT(3)));
+
+prevSign2 = sign(f2(T0(1), T0(2), T0(3)));
+currSign2 = sign(f2(currT(1), currT(2), currT(3)));
 
 % set the number of iterations to 0 
 iter = 0;
@@ -66,10 +68,12 @@ while (iter <= maxIter)
    % set the previous sign to the current sign
    prevSign = currSign;
    prevSign1 = currSign1;
+   prevSign2 = currSign2;
    
    % generate a new sign
    currSign = sign(f(currT(1), currT(2), currT(3)));
    currSign1 = sign(f1(currT(1), currT(2), currT(3)));
+   currSign2 = sign(f2(currT(1), currT(2), currT(3)));
    
    if (currSign ~= prevSign)
     % define a starting approximation
@@ -83,6 +87,10 @@ while (iter <= maxIter)
   
     % add the hit point to the list of hit points
     T = [T; U];
+
+    if (testRef == 0)
+        ret = raytracing(def_colors, @(x,y,z) 0, f1, f2, @(x,y,z) 0, @(x,y,z) 0, @(x,y,z) 0, df1dx, df1dy, df1dz, df2dx, df2dy, df2dz, U, lightOrigin - U, lightOrigin, step, maxIter, maxRef, 1);
+    end
   
     % compute the angle between the normal and lightsource
     cos_reflAngle = reflectionAngle(v, U, lightOrigin, dfdx, dfdy, dfdz);
@@ -106,12 +114,41 @@ while (iter <= maxIter)
     T = [T; U];
 
     if (testRef == 0)
-        ret = raytracing(def_colors, f, @(x,y,z) 0, dfdx, dfdy, dfdz, @(x,y,z) 0, @(x,y,z) 0, @(x,y,z) 0, U, lightOrigin - U, lightOrigin, step, maxIter, maxRef, 1);
+        ret = raytracing(def_colors, f, @(x,y,z) 0, f2, dfdx, dfdy, dfdz, @(x,y,z) 0, @(x,y,z) 0, @(x,y,z) 0, df2dx, df2dy, df2dz, U, lightOrigin - U, lightOrigin, step, maxIter, maxRef, 1);
     end
    
     % computing the angle between reflection vector and the light source
     cos_reflAngle = reflectionAngle(v, U, lightOrigin, df1dx, df1dy, df1dz);
-    def_color = def_colors(:, 2);
+    %def_color = def_colors(:, 2);
+    cVal = f1 (U(1), U(2), U(3));
+    if (mod(floor(U(1).*2),2) == 0 && mod(floor(U(2).*2),2) ~= 0)
+        def_color =  [0.7 0.7 0.7];
+    else
+        def_color = [1 1 1];
+    end
+    break;
+  end
+
+  if (currSign2 ~= prevSign2)
+    % define a starting approximation
+    startingApproximation = (t + (t - step)) / 2;
+  
+    % use Newton's method to get a better approximation of the parameter
+    u = newton(g2, g2dot, startingApproximation, 1e-10, 100);
+  
+    % determine the better hit point
+    U = T0 + v*u;
+  
+    % add the hit point to the list of hit points
+    T = [T; U];
+
+    if (testRef == 0)
+        ret = raytracing(def_colors, f, f1, @(x, y, z) 0, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, @(x, y, z) 0, @(x, y, z) 0, @(x, y, z) 0, U, lightOrigin - U, lightOrigin, step, maxIter, maxRef, 1);
+    end
+   
+    % computing the angle between reflection vector and the light source
+    cos_reflAngle = reflectionAngle(v, U, lightOrigin, df2dx, df2dy, df2dz);
+    def_color = def_colors(:, 3);
     break;
     end
    
@@ -120,16 +157,19 @@ end
 % if there are more iterations than allowed, set cos of angle to 0
 if (iter > maxIter)
   cos_reflAngle = 0;
+  %color = [0; 0.5; 0];
 end
-
+%else
 % if angle between light source and intersection is bigger than pi/2,
 % ignore the point
 if (isempty(ret) || (ret(1,1) == 0 && ret(2, 1) == 0 && ret(3, 1) == 0))
-    color = (2.*cos_reflAngle).*def_color.*(iter./maxIter); 
+    color = (2.*cos_reflAngle).*def_color.*(iter./200); 
 else
-    color = [0; 0; 0];
+    color = (cos_reflAngle).*def_color.*(iter./maxIter);
+    %color = [0; 0; 0];
 end
 end
+%end
 
 function [X, n] = newton(F, JF, X0, tol, maxit)
 %X = newton(F, JF, X0, tol, maxit) solves the (nonlinear) 
