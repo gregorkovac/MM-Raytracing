@@ -1,13 +1,13 @@
-f = @(x, y, z) (x - 0).^2 + (y - 0.5).^2 + (z + 1).^2 - 0.2.^2;
+f = @(x, y, z) (x + 0).^2 + (y - 0.5).^2 + (z + 1).^2 - 0.5.^2;
 % computing partial derivatives to the parametrization of the sphere
-dfdx = @(x, y, z) 2.*x;
+dfdx = @(x, y, z) 2.*(x + 0);
 dfdy = @(x, y, z) 2.*(y - 0.5);
 dfdz = @(x, y, z) 2.*(z + 1);
 
-f1 = @(x, y, z) -2.*x - 2.*y + 5.*z + 7;
-df1dx = @(x, y, z) -2;
-df1dy = @(x, y, z) -2;
-df1dz = @(x, y, z) 5;
+f1 = @(x, y, z) 0.*x + -1.*y + 1.*z + 2;
+df1dx = @(x, y, z) 0;
+df1dy = @(x, y, z) -1;
+df1dz = @(x, y, z) 1;
 
 % CYLINDER
 %{
@@ -27,18 +27,18 @@ df2dz = @(x, y, z) 2.*(z + 1);
 
 
 % TORUS
-f2 = @(x, y, z) (0.4 - ((x - 0).^2 + (y - 0.5).^2).^0.5).^2 + (z+0.7).^2 - 0.01;
+f2 = @(x, y, z) 0;
 % computing partial derivatives to the parametrization of the sphere
-df2dx = @(x, y, z) (x - 0) .* (2 - 0.8./((x - 0).^2 + (y - 0.5).^2).^0.5);
-df2dy = @(x, y, z) (y - 0.5) .* (2 - 0.8./((x - 0).^2 + (y - 0.5).^2).^0.5);
-df2dz = @(x, y, z) 2 .* (z+0.7);
+df2dx = @(x, y, z) 0;
+df2dy = @(x, y, z) 0;
+df2dz = @(x, y, z) 0;
 
 %fimplicit3(f2, [-10, 10, -10, 10, -10, 10]);
 
-image_width = 200;
-image_height = 150;
+image_width = 400;
+image_height = 300;
 %initializing white image
-image = zeros(image_height, image_width, 3); 
+image = ones(image_height, image_width, 3); 
 
 %initializing origin of rayes
 

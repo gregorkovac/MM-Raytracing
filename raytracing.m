@@ -93,11 +93,15 @@ while (iter <= maxIter)
     end
   
     % compute the angle between the normal and lightsource
-    cos_reflAngle = reflectionAngle(v, U, lightOrigin, dfdx, dfdy, dfdz);
+    [cos_reflAngle, reflVec] = reflectionAngle(v, U, lightOrigin, dfdx, dfdy, dfdz);
     
     % choose color for coloring the point
     %def_color = def_colors(:, 1);
-    def_color = rand(3, 1);
+    %def_color = rand(3, 1);
+
+    col = raytracing(def_colors, @(x,y,z) 0, f1, f2, @(x,y,z) 0, @(x,y,z) 0, @(x,y,z) 0, df1dx, df1dy, df1dz, df2dx, df2dy, df2dz, U, reflVec, lightOrigin, step, maxIter, maxRef, 1);
+
+    def_color = col;
   break;
   end
  
@@ -122,8 +126,12 @@ while (iter <= maxIter)
     cos_reflAngle = reflectionAngle(v, U, lightOrigin, df1dx, df1dy, df1dz);
     %def_color = def_colors(:, 2);
     cVal = f1 (U(1), U(2), U(3));
-    if (mod(floor(U(1).*2),2) == 0 && mod(floor(U(2).*2),2) ~= 0)
-        def_color =  [0.7 0.7 0.7];
+    if (mod(floor(U(1).*2),2) == 0)
+        if (mod(floor(U(1).*2),4) == 0)
+            def_color =  [0.5 0.5 0.5];
+        else
+            def_color =  [0.7 0.7 0.7];
+        end;
     else
         def_color = [1 1 1];
     end
@@ -163,10 +171,12 @@ end
 %else
 % if angle between light source and intersection is bigger than pi/2,
 % ignore the point
-if (isempty(ret) || (ret(1,1) == 0 && ret(2, 1) == 0 && ret(3, 1) == 0))
-    color = (2.*cos_reflAngle).*def_color.*(iter./200); 
+if (isempty(T))
+    color = [0.2; 0.8; 1];
+elseif (isempty(ret) || (ret(1,1) == 0 && ret(2, 1) == 0 && ret(3, 1) == 0))
+    color = (2.*cos_reflAngle).*def_color.*(iter./100); 
 else
-    color = (cos_reflAngle).*def_color.*(iter./maxIter);
+    color = (cos_reflAngle).*def_color.*(iter./100);
     %color = [0; 0; 0];
 end
 end
@@ -193,7 +203,7 @@ if(n == maxit)
 end
 end
 
-function cosf = reflectionAngle(v, T, lightOrigin, dfdx, dfdy, dfdz)  
+function [cosf, r] = reflectionAngle(v, T, lightOrigin, dfdx, dfdy, dfdz)  
   % fi = reflectionAngle(f, T) calculates the angle 
   % needed for determining the color in raytracing.  
   % Depeneding on the chosen option it can calculate angle:
