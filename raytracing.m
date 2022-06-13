@@ -96,7 +96,8 @@ while (iter <= maxIter)
     cos_reflAngle = reflectionAngle(v, U, lightOrigin, dfdx, dfdy, dfdz);
     
     % choose color for coloring the point
-    def_color = def_colors(:, 1);
+    %def_color = def_colors(:, 1);
+    def_color = rand(3, 1);
   break;
   end
  
@@ -148,7 +149,8 @@ while (iter <= maxIter)
    
     % computing the angle between reflection vector and the light source
     cos_reflAngle = reflectionAngle(v, U, lightOrigin, df2dx, df2dy, df2dz);
-    def_color = def_colors(:, 3);
+    %def_color = def_colors(:, 3);
+    def_color = [cos(U(1)); U(2); U(3)];
     break;
     end
    
@@ -157,7 +159,6 @@ end
 % if there are more iterations than allowed, set cos of angle to 0
 if (iter > maxIter)
   cos_reflAngle = 0;
-  %color = [0; 0.5; 0];
 end
 %else
 % if angle between light source and intersection is bigger than pi/2,

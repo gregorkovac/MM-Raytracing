@@ -35,8 +35,8 @@ df2dz = @(x, y, z) 2 .* (z+0.7);
 
 %fimplicit3(f2, [-10, 10, -10, 10, -10, 10]);
 
-image_width = 400;
-image_height = 300;
+image_width = 200;
+image_height = 150;
 %initializing white image
 image = zeros(image_height, image_width, 3); 
 
@@ -75,11 +75,11 @@ for i=1:image_height
 end
 
 % softening the image
-for i=2:image_height-1
-    for j=2:image_width-1
-        image(i, j, :) = 0.5.* image(i,j, :) + (image(i + 1, j, :) + image(i + 1, j + 1, :) + image(i + 1,j - 1, :) + image(i - 1, j, :) + image(i - 1, j + 1, :) + image(i - 1, j - 1, :) + image(i, j - 1, :) + image(i, j + 1))./16;
-    end
-end
+%for i=2:image_height-1
+%    for j=2:image_width-1
+%        image(i, j, :) = 0.5.* image(i,j, :) + (image(i + 1, j, :) + image(i + 1, j + 1, :) + image(i + 1,j - 1, :) + image(i - 1, j, :) + image(i - 1, j + 1, :) + image(i - 1, j - 1, :) + image(i, j - 1, :) + image(i, j + 1))./16;
+%    end
+%end
 
 % showing image
 imshow(image)
