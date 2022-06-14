@@ -97,11 +97,11 @@ while (iter <= maxIter)
     
     % choose color for coloring the point
     %def_color = def_colors(:, 1);
-    %def_color = rand(3, 1);
+    
+    def_color = rand(3, 1);
 
-    col = raytracing(def_colors, @(x,y,z) 0, f1, f2, @(x,y,z) 0, @(x,y,z) 0, @(x,y,z) 0, df1dx, df1dy, df1dz, df2dx, df2dy, df2dz, U, reflVec, lightOrigin, step, maxIter, maxRef, 1);
-
-    def_color = col;
+    % optional: for reflective surface
+    %def_color = raytracing(def_colors, @(x,y,z) 0, f1, f2, @(x,y,z) 0, @(x,y,z) 0, @(x,y,z) 0, df1dx, df1dy, df1dz, df2dx, df2dy, df2dz, U, reflVec, lightOrigin, step, maxIter, maxRef, 1);
   break;
   end
  
@@ -125,15 +125,15 @@ while (iter <= maxIter)
     % computing the angle between reflection vector and the light source
     cos_reflAngle = reflectionAngle(v, U, lightOrigin, df1dx, df1dy, df1dz);
     %def_color = def_colors(:, 2);
-    cVal = f1 (U(1), U(2), U(3));
-    if (mod(floor(U(1).*2),2) == 0)
-        if (mod(floor(U(1).*2),4) == 0)
-            def_color =  [0.5 0.5 0.5];
-        else
-            def_color =  [0.7 0.7 0.7];
-        end;
-    else
-        def_color = [1 1 1];
+
+    if (mod(floor(U(1).*2),2) == 0 && mod(floor(U(2).*2),2) == 0)
+        def_color =   [61; 53; 54]./255;
+    elseif (mod(floor(U(1).*2),2) ~= 0 && mod(floor(U(2).*2),2) == 0)
+        def_color =  [255; 255; 255]./255;
+    elseif (mod(floor(U(1).*2),2) == 0 && mod(floor(U(2).*2),2) ~= 0)
+        def_color =  [186; 177; 177]./255;
+    else 
+        def_color = [77; 73; 74]./255;
     end
     break;
   end
@@ -164,20 +164,20 @@ while (iter <= maxIter)
    
 end
 
-% if there are more iterations than allowed, set cos of angle to 0
 if (iter > maxIter)
-  cos_reflAngle = 0;
+    cos_reflAngle = 0;
+    % optional: for reflective surfaces
+    % if there are more iterations than allowed, set color to 
+    % default color of background
+    % color = [0.2; 0.8; 1];
+    % return;
 end
-%else
-% if angle between light source and intersection is bigger than pi/2,
-% ignore the point
-if (isempty(T))
+if (isempty(T) && testRef == 0)
     color = [0.2; 0.8; 1];
 elseif (isempty(ret) || (ret(1,1) == 0 && ret(2, 1) == 0 && ret(3, 1) == 0))
-    color = (2.*cos_reflAngle).*def_color.*(iter./100); 
+    color = (2.*cos_reflAngle).*def_color.*(iter./200); 
 else
-    color = (cos_reflAngle).*def_color.*(iter./100);
-    %color = [0; 0; 0];
+    color = (cos_reflAngle).*def_color.*(iter./200);
 end
 end
 %end
@@ -204,8 +204,8 @@ end
 end
 
 function [cosf, r] = reflectionAngle(v, T, lightOrigin, dfdx, dfdy, dfdz)  
-  % fi = reflectionAngle(f, T) calculates the angle 
-  % needed for determining the color in raytracing.  
+  % fi = reflectionAngle(f, T) returnes the angle 
+  % needed for determining the color in raytracing and a reflection vector.  
   % Depeneding on the chosen option it can calculate angle:
   %    1. between normal vector and light source 
   %    2. between reflection vector of the ray and light source 
