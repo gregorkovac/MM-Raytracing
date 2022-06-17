@@ -1,5 +1,7 @@
 # Raytracing
 
+**🚨 WARNING:** If you are a FRI student feel free to use this code to help yourself with your own (raytracing) project. But please do not copy the code or its segments, because plagiarism is taken very seriously at our faculty!
+
 ## Description
 
 This is an implementation of raytracing in Matlab created during the Mathematical modeling course at Faculty of Computer and Information Science - University of Ljubljana.
