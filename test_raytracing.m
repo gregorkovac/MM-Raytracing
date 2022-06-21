@@ -8,7 +8,7 @@ dfdz = @(x, y, z) 2.*(z + 1);
 
 % equation of plane and corresponding partial derivatives
 f1 = @(x, y, z) 0.*x + -1.*y + 1.*z + 2;
-df1dx = @(x, y, z) 0;
+df1dx = @(x, y, z) 0
 df1dy = @(x, y, z) -1;
 df1dz = @(x, y, z) 1;
 
@@ -55,8 +55,8 @@ df2dz = @(x, y, z) 2.*(z + 1);
 %df2dz = @(x, y, z) 2.*(z + 0.6);
 %}
 
-image_width = 400;
-image_height = 300;
+image_width = 200;
+image_height = 150;
 
 %initializing white image
 image = zeros(image_height, image_width, 3); 
@@ -86,7 +86,7 @@ for i=1:image_height
     def_colors = [0.8 0 0.1; 0.5 0.5 0.5; 0.1 0.9 0.2]';
     
     % raytracing with camera
-    image(i, j, :) = raytracing(def_colors, f, f1, f2, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, df2dx, df2dy, df2dz, origin, direction_vector, lightOrigin, 0.01, 500, 10, 0);
+    image(i, j, :) = raytracing(f, f1, f2, dfdx, dfdy, dfdz, df1dx, df1dy, df1dz, df2dx, df2dy, df2dz, origin, direction_vector, lightOrigin, 0.01, 500, 0, def_colors, 0, 0, 0, [0.2; 0.8; 1]);
     end
 end
 
