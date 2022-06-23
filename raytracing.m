@@ -252,7 +252,7 @@ if (isempty(T) && testRef == 0)
     color = skyColor;
 elseif (isempty(ret) || (ret(1,1) == 0 && ret(2, 1) == 0 && ret(3, 1) == 0))
     % normal coloring
-    color = (2.*cos_reflAngle).*def_color.*(iter./200); 
+    color = (cos_reflAngle).*def_color.*(iter./100); 
 else
     % coloring if an object is between the intersection and the light
     % source
